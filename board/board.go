@@ -63,9 +63,12 @@ func (b *Board) Reverse(x, y int) bool {
 		y_increase := cell.y - y
 		x_target := x + x_increase
 		y_target := y + y_increase
+		var target_cells []Cell
 		for (x_target > 0 && x_target < 8) || (y_target > 0 && y_target < 8) {
+			target_cells = append(target_cells, b.rows[x_target].cells[y_target])
 			if b.rows[x_target].cells[y_target].val == WHITE_VAL {
 				// TODO: reverse othello
+				cellReverce(target_cells, b, WHITE_VAL)
 				return true
 			}
 			x_target += x_increase
@@ -83,6 +86,12 @@ func initVal(x, y int) int {
 		return BLACK_VAL
 	}
 	return SPACE_VAL
+}
+
+func cellReverce(cells []Cell, b *Board, color int) {
+	for _, cell := range cells {
+		b.rows[cell.x].cells[cell.y].val = color
+	}
 }
 
 func (b *Board) Print() {
