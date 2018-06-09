@@ -1,6 +1,8 @@
 package board
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Cell struct {
 	x   int
@@ -18,18 +20,18 @@ type Board struct {
 }
 
 const (
-	BOARD_X   = 8
-	BOARD_Y   = 8
-	SPACE_VAL = 0
-	WHITE_VAL = 1
-	BLACK_VAL = 2
+	BOARD_SIZE_X = 8
+	BOARD_SIZE_Y = 8
+	SPACE_VAL    = 0
+	WHITE_VAL    = 1
+	BLACK_VAL    = 2
 )
 
 func (b *Board) Initial() {
-	for i := 0; i < BOARD_X; i++ {
+	for i := 0; i < BOARD_SIZE_X; i++ {
 		var row Row
-		for j := 0; j < BOARD_Y; j++ {
-			cell := Cell{x: i, y: j, val: getVal(i, j)}
+		for j := 0; j < BOARD_SIZE_Y; j++ {
+			cell := Cell{x: i, y: j, val: initVal(i, j)}
 			row.num = i
 			row.cells = append(row.cells, cell)
 		}
@@ -37,7 +39,17 @@ func (b *Board) Initial() {
 	}
 }
 
-func getVal(x, y int) int {
+func (b *Board) Update(x, y int) {
+	for row_key, row := range b.rows {
+		for cell_key, cell := range row.cells {
+			if cell.x == x && cell.y == y {
+				b.rows[row_key].cells[cell_key].val = WHITE_VAL
+			}
+		}
+	}
+}
+
+func initVal(x, y int) int {
 	if x == 3 && y == 3 || x == 4 && y == 4 {
 		return WHITE_VAL
 	}
@@ -54,10 +66,10 @@ func (b *Board) Print() {
 				fmt.Print(" - ")
 			}
 			if cell.val == WHITE_VAL {
-				fmt.Print(" ○ ")
+				fmt.Print(" ● ")
 			}
 			if cell.val == BLACK_VAL {
-				fmt.Print(" ● ")
+				fmt.Print(" ○ ")
 			}
 			if key == len(row.cells)-1 {
 				fmt.Print("\n")
