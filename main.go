@@ -21,6 +21,10 @@ func main() {
 		splited := strings.Split(strings.TrimRight(text, "\n"), ",")
 		x, _ := strconv.Atoi(splited[0])
 		y, _ := strconv.Atoi(splited[1])
+		if !board.Reverse(x, y) {
+			fmt.Println("invalid refers to the board")
+			continue
+		}
 		board.Update(x, y)
 	}
 }

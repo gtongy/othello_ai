@@ -49,6 +49,32 @@ func (b *Board) Update(x, y int) {
 	}
 }
 
+func (b *Board) Reverse(x, y int) bool {
+	if b.rows[x].cells[y].val != SPACE_VAL {
+		return false
+	}
+	var children Children
+	children.set(b, x, y)
+	for _, cell := range children.cells {
+		if cell.val != BLACK_VAL {
+			continue
+		}
+		x_increase := cell.x - x
+		y_increase := cell.y - y
+		x_target := x + x_increase
+		y_target := y + y_increase
+		for (x_target > 0 && x_target < 8) || (y_target > 0 && y_target < 8) {
+			if b.rows[x_target].cells[y_target].val == WHITE_VAL {
+				// TODO: reverse othello
+				return true
+			}
+			x_target += x_increase
+			y_target += y_increase
+		}
+	}
+	return false
+}
+
 func initVal(x, y int) int {
 	if x == 3 && y == 3 || x == 4 && y == 4 {
 		return WHITE_VAL
