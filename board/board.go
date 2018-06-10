@@ -16,6 +16,7 @@ type Row struct {
 }
 
 type Board struct {
+	Turn bool // true: my_turn, false: your_turn
 	rows []Row
 }
 
@@ -28,6 +29,7 @@ const (
 )
 
 func (b *Board) Initial() {
+	b.Turn = true
 	for i := 0; i < BOARD_SIZE_X; i++ {
 		var row Row
 		for j := 0; j < BOARD_SIZE_Y; j++ {
@@ -39,42 +41,35 @@ func (b *Board) Initial() {
 	}
 }
 
-func (b *Board) Update(x, y int) {
-	for row_key, row := range b.rows {
-		for cell_key, cell := range row.cells {
-			if cell.x == x && cell.y == y {
-				b.rows[row_key].cells[cell_key].val = WHITE_VAL
-			}
-		}
-	}
-}
-
-func (b *Board) Reverse(x, y int) bool {
+func (b *Board) Reverse(x, y, my_val, your_val int) bool {
 	if b.rows[x].cells[y].val != SPACE_VAL {
 		return false
 	}
 	var children Children
 	children.set(b, x, y)
 	for _, cell := range children.cells {
-		if cell.val != BLACK_VAL {
+		if cell.val != your_val {
 			continue
 		}
+		var target_cells []Cell
+		target_cells = append(target_cells, b.rows[x].cells[y])
 		x_increase := cell.x - x
 		y_increase := cell.y - y
 		x_target := x + x_increase
 		y_target := y + y_increase
-		var target_cells []Cell
-		for (x_target > 0 && x_target < 8) || (y_target > 0 && y_target < 8) {
+		for x_target >= 0 && x_target <= 7 && y_target >= 0 && y_target <= 7 {
 			target_cells = append(target_cells, b.rows[x_target].cells[y_target])
-			if b.rows[x_target].cells[y_target].val == WHITE_VAL {
-				// TODO: reverse othello
-				cellReverce(target_cells, b, WHITE_VAL)
+			if b.rows[x_target].cells[y_target].val == my_val {
+				fmt.Println(target_cells)
+				cellReverce(target_cells, b, my_val)
 				return true
 			}
 			x_target += x_increase
 			y_target += y_increase
 		}
 	}
+	// TODO: split this condition
+	fmt.Println("reverse cell is not exists")
 	return false
 }
 
@@ -111,4 +106,15 @@ func (b *Board) Print() {
 			}
 		}
 	}
+}
+
+func (b *Board) EndGame() bool {
+	for _, row := range b.rows {
+		for _, cell := range row.cells {
+			if cell.val == SPACE_VAL {
+				return false
+			}
+		}
+	}
+	return true
 }
