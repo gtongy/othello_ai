@@ -42,35 +42,49 @@ func (b *Board) Initial() {
 }
 
 func (b *Board) Reverse(x, y, my_val, your_val int) bool {
+	reverceCells := b.ReverceCells(x, y, my_val, your_val)
+	if reverceCells != nil {
+		cellReverce(reverceCells, b, my_val)
+		return true
+	}
+	return false
+}
+
+func (b *Board) ReverceCells(x, y, my_val, your_val int) []Cell {
 	if b.rows[x].cells[y].val != SPACE_VAL {
-		return false
+		return nil
 	}
 	var children Children
 	children.set(b, x, y)
+	var reverceCells []Cell
 	for _, cell := range children.cells {
 		if cell.val != your_val {
 			continue
 		}
-		var target_cells []Cell
-		target_cells = append(target_cells, b.rows[x].cells[y])
-		x_increase := cell.x - x
-		y_increase := cell.y - y
-		x_target := x + x_increase
-		y_target := y + y_increase
-		for x_target >= 0 && x_target <= 7 && y_target >= 0 && y_target <= 7 {
-			target_cells = append(target_cells, b.rows[x_target].cells[y_target])
-			if b.rows[x_target].cells[y_target].val == my_val {
-				fmt.Println(target_cells)
-				cellReverce(target_cells, b, my_val)
-				return true
+		var targetCells []Cell
+		targetCells = append(targetCells, b.rows[x].cells[y])
+		xIncrease := cell.x - x
+		yIncrease := cell.y - y
+		xTarget := x + xIncrease
+		yTarget := y + yIncrease
+		var exists bool
+		exists = false
+		for xTarget >= 0 && xTarget <= 7 && yTarget >= 0 && yTarget <= 7 {
+			targetCells = append(targetCells, b.rows[xTarget].cells[yTarget])
+			if b.rows[xTarget].cells[yTarget].val == my_val {
+				exists = true
+				break
 			}
-			x_target += x_increase
-			y_target += y_increase
+			xTarget += xIncrease
+			yTarget += yIncrease
+		}
+		if exists {
+			for _, targetCell := range targetCells {
+				reverceCells = append(reverceCells, targetCell)
+			}
 		}
 	}
-	// TODO: split this condition
-	fmt.Println("reverse cell is not exists")
-	return false
+	return reverceCells
 }
 
 func initVal(x, y int) int {
@@ -117,4 +131,24 @@ func (b *Board) EndGame() bool {
 		}
 	}
 	return true
+}
+
+func (b *Board) HasToPut(turn bool) bool {
+	var my_val int
+	var your_val int
+	if turn {
+		my_val = WHITE_VAL
+		your_val = BLACK_VAL
+	} else {
+		my_val = BLACK_VAL
+		your_val = WHITE_VAL
+	}
+	for _, row := range b.rows {
+		for _, cell := range row.cells {
+			if b.ReverceCells(cell.x, cell.y, my_val, your_val) != nil {
+				return true
+			}
+		}
+	}
+	return false
 }

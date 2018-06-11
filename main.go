@@ -15,6 +15,11 @@ func main() {
 	b.Initial()
 	for !b.EndGame() {
 		b.Print()
+		if !b.HasToPut(b.Turn) {
+			fmt.Println("There is no place to put.")
+			b.Turn = !b.Turn
+			continue
+		}
 		if b.Turn == true {
 			fmt.Println("my turn")
 			if !move(b, board.WHITE_VAL, board.BLACK_VAL) {
