@@ -1,6 +1,8 @@
 package board
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Cell struct {
 	x   int
@@ -14,22 +16,25 @@ type Row struct {
 }
 
 type Board struct {
+	Turn bool
 	rows []Row
 }
 
+// board constant
 const (
-	BOARD_X   = 8
-	BOARD_Y   = 8
-	SPACE_VAL = 0
-	WHITE_VAL = 1
-	BLACK_VAL = 2
+	BoardSizeX = 8
+	BoardSizeY = 8
+	SpaceVal   = 0
+	WhiteVal   = 1
+	BlackVal   = 2
 )
 
 func (b *Board) Initial() {
-	for i := 0; i < BOARD_X; i++ {
+	b.Turn = true
+	for i := 0; i < BoardSizeX; i++ {
 		var row Row
-		for j := 0; j < BOARD_Y; j++ {
-			cell := Cell{x: i, y: j, val: getVal(i, j)}
+		for j := 0; j < BoardSizeY; j++ {
+			cell := Cell{x: i, y: j, val: initVal(i, j)}
 			row.num = i
 			row.cells = append(row.cells, cell)
 		}
@@ -37,31 +42,114 @@ func (b *Board) Initial() {
 	}
 }
 
-func getVal(x, y int) int {
+func (b *Board) Reverse(x, y, myVal, yourVal int) bool {
+	reverceCells := b.ReverceCells(x, y, myVal, yourVal)
+	if reverceCells != nil {
+		cellReverce(reverceCells, b, myVal)
+		return true
+	}
+	return false
+}
+
+func (b *Board) ReverceCells(x, y, myVal, yourVal int) []Cell {
+	if b.rows[x].cells[y].val != SpaceVal {
+		return nil
+	}
+	var children Children
+	children.set(b, x, y)
+	var reverceCells []Cell
+	for _, cell := range children.cells {
+		if cell.val != yourVal {
+			continue
+		}
+		var targetCells []Cell
+		targetCells = append(targetCells, b.rows[x].cells[y])
+		xIncrease := cell.x - x
+		yIncrease := cell.y - y
+		xTarget := x + xIncrease
+		yTarget := y + yIncrease
+		var exists bool
+		exists = false
+		for xTarget >= 0 && xTarget <= 7 && yTarget >= 0 && yTarget <= 7 {
+			targetCells = append(targetCells, b.rows[xTarget].cells[yTarget])
+			if b.rows[xTarget].cells[yTarget].val == myVal {
+				exists = true
+				break
+			}
+			xTarget += xIncrease
+			yTarget += yIncrease
+		}
+		if exists {
+			for _, targetCell := range targetCells {
+				reverceCells = append(reverceCells, targetCell)
+			}
+		}
+	}
+	return reverceCells
+}
+
+func initVal(x, y int) int {
 	if x == 3 && y == 3 || x == 4 && y == 4 {
-		return WHITE_VAL
+		return WhiteVal
 	}
 	if x == 3 && y == 4 || x == 4 && y == 3 {
-		return BLACK_VAL
+		return BlackVal
 	}
-	return SPACE_VAL
+	return SpaceVal
+}
+
+func cellReverce(cells []Cell, b *Board, color int) {
+	for _, cell := range cells {
+		b.rows[cell.x].cells[cell.y].val = color
+	}
 }
 
 func (b *Board) Print() {
 	for _, row := range b.rows {
 		for key, cell := range row.cells {
-			if cell.val == SPACE_VAL {
+			if cell.val == SpaceVal {
 				fmt.Print(" - ")
 			}
-			if cell.val == WHITE_VAL {
-				fmt.Print(" ○ ")
-			}
-			if cell.val == BLACK_VAL {
+			if cell.val == WhiteVal {
 				fmt.Print(" ● ")
+			}
+			if cell.val == BlackVal {
+				fmt.Print(" ○ ")
 			}
 			if key == len(row.cells)-1 {
 				fmt.Print("\n")
 			}
 		}
 	}
+}
+
+func (b *Board) EndGame() bool {
+	for _, row := range b.rows {
+		for _, cell := range row.cells {
+			if cell.val == SpaceVal {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func (b *Board) HasToPut(turn bool) bool {
+	var myVal int
+	var yourVal int
+	if turn {
+		myVal = WhiteVal
+		yourVal = BlackVal
+	} else {
+		myVal = BlackVal
+		yourVal = WhiteVal
+	}
+	for _, row := range b.rows {
+		for _, cell := range row.cells {
+			if b.ReverceCells(cell.x, cell.y, myVal, yourVal) != nil {
+				return true
+			}
+		}
+	}
+	return false
 }
