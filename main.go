@@ -8,11 +8,14 @@ import (
 	"strings"
 
 	"github.com/gtongy/othello_ai/board"
+	"github.com/gtongy/othello_ai/evaluate"
 )
 
 func main() {
 	var b board.Board
-	b.Initial()
+	var evaluation evaluate.Evaluation
+	evaluation.Set()
+	b.Initial(evaluation.Rows)
 	for !b.EndGame() {
 		b.Print()
 		if !b.HasToPut(b.Turn) {

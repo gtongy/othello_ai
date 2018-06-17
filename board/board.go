@@ -5,9 +5,10 @@ import (
 )
 
 type Cell struct {
-	x   int
-	y   int
-	val int
+	x    int
+	y    int
+	val  int
+	eval int
 }
 
 type Row struct {
@@ -29,12 +30,12 @@ const (
 	BlackVal   = 2
 )
 
-func (b *Board) Initial() {
+func (b *Board) Initial(evals [][]int) {
 	b.Turn = true
 	for i := 0; i < BoardSizeX; i++ {
 		var row Row
 		for j := 0; j < BoardSizeY; j++ {
-			cell := Cell{x: i, y: j, val: initVal(i, j)}
+			cell := Cell{x: i, y: j, val: initVal(i, j), eval: evals[i][j]}
 			row.num = i
 			row.cells = append(row.cells, cell)
 		}
