@@ -24,13 +24,15 @@ func main() {
 			continue
 		}
 		if b.Turn == true {
-			fmt.Println("my turn")
+			fmt.Println("my turn, can put cells are")
+			fmt.Println(b.GetToPutNextCells(b.Turn))
 			if !move(b, board.WhiteVal, board.BlackVal) {
 				continue
 			}
 		}
 		if b.Turn == false {
-			fmt.Println("your turn")
+			fmt.Println("your turn, can put cells are")
+			fmt.Println(b.GetToPutNextCells(b.Turn))
 			if !move(b, board.BlackVal, board.WhiteVal) {
 				continue
 			}
