@@ -135,8 +135,24 @@ func (b *Board) EndGame() bool {
 	return true
 }
 
+func (b *Board) Calculate() (int, int) {
+	var myCount int
+	var yourCount int
+	for _, row := range b.rows {
+		for _, cell := range row.cells {
+			if cell.val == WhiteVal {
+				myCount++
+			}
+			if cell.val == BlackVal {
+				yourCount++
+			}
+		}
+	}
+	return myCount, yourCount
+}
+
 func (b *Board) HasToPut(turn bool) bool {
-	myVal, yourVal := getColor(turn)
+	myVal, yourVal := GetColor(turn)
 	for _, row := range b.rows {
 		for _, cell := range row.cells {
 			if b.ReverceCells(cell.x, cell.y, myVal, yourVal) != nil {
@@ -149,7 +165,7 @@ func (b *Board) HasToPut(turn bool) bool {
 
 func (b *Board) GetToPutNextCells(turn bool) []Cell {
 	var cells []Cell
-	myVal, yourVal := getColor(turn)
+	myVal, yourVal := GetColor(turn)
 	for _, row := range b.rows {
 		for _, cell := range row.cells {
 			if b.ReverceCells(cell.x, cell.y, myVal, yourVal) != nil {
@@ -160,10 +176,13 @@ func (b *Board) GetToPutNextCells(turn bool) []Cell {
 	return cells
 }
 
-func getColor(turn bool) (myVal int, yourVal int) {
+func GetColor(turn bool) (myVal int, yourVal int) {
 	if turn {
 		return WhiteVal, BlackVal
 	}
 	return BlackVal, WhiteVal
+}
 
+func GetPosition(cell Cell) (int, int) {
+	return cell.x, cell.y
 }

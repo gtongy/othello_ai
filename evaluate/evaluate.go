@@ -11,7 +11,6 @@ type Evaluation struct {
 }
 
 func (evaluation *Evaluation) Set() {
-	// JSONファイル読み込み
 	bytes, err := ioutil.ReadFile("./evaluate/evaluation.json")
 	if err != nil {
 		log.Fatal(err)
