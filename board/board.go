@@ -5,9 +5,10 @@ import (
 )
 
 type Cell struct {
-	x   int
-	y   int
-	val int
+	x    int
+	y    int
+	val  int
+	eval int
 }
 
 type Row struct {
@@ -29,12 +30,12 @@ const (
 	BlackVal   = 2
 )
 
-func (b *Board) Initial() {
+func (b *Board) Initial(evals [][]int) {
 	b.Turn = true
 	for i := 0; i < BoardSizeX; i++ {
 		var row Row
 		for j := 0; j < BoardSizeY; j++ {
-			cell := Cell{x: i, y: j, val: initVal(i, j)}
+			cell := Cell{x: i, y: j, val: initVal(i, j), eval: evals[i][j]}
 			row.num = i
 			row.cells = append(row.cells, cell)
 		}
@@ -134,16 +135,24 @@ func (b *Board) EndGame() bool {
 	return true
 }
 
-func (b *Board) HasToPut(turn bool) bool {
-	var myVal int
-	var yourVal int
-	if turn {
-		myVal = WhiteVal
-		yourVal = BlackVal
-	} else {
-		myVal = BlackVal
-		yourVal = WhiteVal
+func (b *Board) Calculate() (int, int) {
+	var myCount int
+	var yourCount int
+	for _, row := range b.rows {
+		for _, cell := range row.cells {
+			if cell.val == WhiteVal {
+				myCount++
+			}
+			if cell.val == BlackVal {
+				yourCount++
+			}
+		}
 	}
+	return myCount, yourCount
+}
+
+func (b *Board) HasToPut(turn bool) bool {
+	myVal, yourVal := GetColor(turn)
 	for _, row := range b.rows {
 		for _, cell := range row.cells {
 			if b.ReverceCells(cell.x, cell.y, myVal, yourVal) != nil {
@@ -152,4 +161,28 @@ func (b *Board) HasToPut(turn bool) bool {
 		}
 	}
 	return false
+}
+
+func (b *Board) GetToPutNextCells(turn bool) []Cell {
+	var cells []Cell
+	myVal, yourVal := GetColor(turn)
+	for _, row := range b.rows {
+		for _, cell := range row.cells {
+			if b.ReverceCells(cell.x, cell.y, myVal, yourVal) != nil {
+				cells = append(cells, cell)
+			}
+		}
+	}
+	return cells
+}
+
+func GetColor(turn bool) (myVal int, yourVal int) {
+	if turn {
+		return WhiteVal, BlackVal
+	}
+	return BlackVal, WhiteVal
+}
+
+func GetPosition(cell Cell) (int, int) {
+	return cell.x, cell.y
 }
